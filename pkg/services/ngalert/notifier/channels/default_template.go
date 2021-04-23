@@ -1,4 +1,15 @@
-{{ define "__alertmanager" }}Alertmanager{{ end }}
+package channels
+
+import (
+	"io/ioutil"
+	"os"
+	"testing"
+
+	"github.com/prometheus/alertmanager/template"
+	"github.com/stretchr/testify/require"
+)
+
+const DefaultTemplateString = `{{ define "__alertmanager" }}Alertmanager{{ end }}
 {{ define "__alertmanagerURL" }}{{ .ExternalURL }}/#/alerts?receiver={{ .Receiver | urlquery }}{{ end }}
 
 {{ define "__subject" }}[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .GroupLabels.SortedPairs.Values | join " " }} {{ if gt (len .CommonLabels) (len .GroupLabels) }}({{ with .CommonLabels.Remove .GroupLabels.Names }}{{ .Values | join " " }}{{ end }}){{ end }}{{ end }}
@@ -228,3 +239,22 @@ Alerts Resolved:
 {{ end }}
 {{ end }}
 {{ define "pushover.default.url" }}{{ template "__alertmanagerURL" . }}{{ end }}
+`
+
+func templateForTests(t *testing.T) (_ *template.Template, retErr error) {
+	f, err := ioutil.TempFile("/tmp", "template")
+	if err != nil {
+		return nil, err
+	}
+
+	t.Cleanup(func() {
+		require.NoError(t, os.RemoveAll(f.Name()))
+	})
+
+	_, err = f.WriteString(DefaultTemplateString)
+	if err != nil {
+		return nil, err
+	}
+
+	return template.FromGlobs(f.Name())
+}

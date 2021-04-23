@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/prometheus/alertmanager/notify"
-	"github.com/prometheus/alertmanager/template"
 	"github.com/prometheus/alertmanager/types"
 	"github.com/prometheus/common/model"
 	"github.com/stretchr/testify/require"
@@ -22,7 +21,7 @@ import (
 )
 
 func TestSlackNotifier(t *testing.T) {
-	tmpl, err := template.FromGlobs("templates/default.tmpl")
+	tmpl, err := templateForTests(t)
 	require.NoError(t, err)
 
 	externalURL, err := url.Parse("http://localhost")

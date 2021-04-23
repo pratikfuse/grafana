@@ -19,7 +19,7 @@ import (
 )
 
 func TestWebhookNotifier(t *testing.T) {
-	tmpl, err := template.FromGlobs("templates/default.tmpl")
+	tmpl, err := templateForTests(t)
 	require.NoError(t, err)
 
 	externalURL, err := url.Parse("http://localhost")
